@@ -1,4 +1,82 @@
 
+/*  body {
+    background: url('/static/img/paisley.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: "Arial", sans-serif;
+    color: #333;
+}
+
+.btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+*/
+/*
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #007bff;
+    padding: 10px 20px;
+    color: white;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-menu li {
+    margin-right: 20px;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.btn-search {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: white;
+    color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-search:hover {
+    background-color: #f1f1f1;
+}
+
+*/
 #results {
     max-height: 300px; /* Limite la hauteur des résultats */
     overflow-y: auto; /* Ajoute un défilement si nécessaire */
@@ -35,8 +113,6 @@ body {
     color: #333;
     margin: 0;
     padding: 0;
-    font-family: 'Lato', sans-serif;
-
 }
 
 .form-wrapper {
@@ -52,18 +128,7 @@ h2 {
     color: #007bff;
     margin-bottom: 20px;
     text-align: center;
-    
 }
-
-/* Style pour les titres h1 */
-h1.text-center {
-    text-transform: uppercase; /* Transforme le texte en majuscules */
-    font-size: 3rem; /* Augmente la taille de la police */
-    font-family: 'Roboto', sans-serif; /* Assurez-vous que votre police est moderne */
-    color: #ff5733; /* Couleur vive pour le texte */
-    margin-bottom: 40px; /* Ajoute un espace au bas */
-}
-
 
 .form-container {
     background-color: rgba(255, 255, 255, 0.9);
@@ -177,8 +242,6 @@ button.btn-submit:hover {
 .btn-validate:hover {
     background-color: #218838;
 }
-
-
 
 
 
