@@ -4,11 +4,28 @@ import datetime
 
 # Modèle Département
 class Departement(models.Model):
-    nom_depart = models.CharField(max_length=100)
+    Departement_ROLE = (
+        ('brigade_joie', 'Brigade La Joie'),
+        ('brigade_fidelite', 'Brigade Fidélité'),
+        ('brigade_charite', 'Brigade Charité'),
+        ('brigade_patience', 'Brigade Patience'),
+        ('brigade_paix', 'Brigade Paix'),
+        ('brigade_bienveillance', 'Brigade Bienveillance'),
+        ('brigade_amour', 'Brigade Amour'),
+        ('brigade_foi', 'Brigade Foi'),
+        ('brigade_bonte', 'Brigade Bonté'),
+        ('brigade_maitrise_de_soi', 'Brigade Maîtrise de Soi'),
+    )
+    nom_depart = models.CharField(max_length=100, unique=True, choices=Departement_ROLE)
+    utilisateur = models.ManyToManyField('Utilisateur', related_name='departements')
+    """ 
     description = models.TextField()
+
+      """
 
     def __str__(self):
         return self.nom_depart
+   
 
 # Modèle Utilisateur
 class Utilisateur(models.Model):
@@ -18,10 +35,10 @@ class Utilisateur(models.Model):
     )
 
     nom = models.CharField(max_length=250)
-    prenoms = models.CharField(max_length=300)
+    prenoms = models.CharField(max_length=300, unique=True)
     numero = models.CharField(max_length=250)
     date_naissance = models.DateField(validators=[MaxValueValidator(datetime.date.today())])
-    departement = models.ForeignKey(Departement, on_delete=models.CASCADE)
+    departement = models.ForeignKey(Departement, on_delete=models.CASCADE, related_name='utilisateurs')
     role = models.CharField(max_length=20, choices=NOM_ROLE, default='utilisateur')
 
     def __str__(self):
@@ -36,7 +53,10 @@ class Evenement(models.Model):
     description = models.TextField()
     date_debut = models.DateTimeField()
     date_fin = models.DateTimeField(blank=True, null=True)
-    organisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, limit_choices_to={'role': 'admin'})
+    # envoie l'image 
+    image = models.ImageField(null=True, blank=True, upload_to="images/")
+    organisateur = models.CharField(max_length=250,blank=True, null=True)
+    
 
     def __str__(self):
         return self.titre
@@ -49,7 +69,7 @@ class Presence(models.Model):
         ('excuse', 'Excusé'),
     )
     membre = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-    evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE)
+    evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateField()
     statut = models.CharField(max_length=10, choices=STATUT_PRESENCE)
     notes = models.TextField(blank=True, null=True)

@@ -1,0 +1,49 @@
+{% extends 'base.html' %} {# Assurez-vous d'avoir un template de base #}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="mb-4 text-primary"><i class="bi bi-search me-2"></i> Recherche pour l'événement : {{ evenement.titre }}</h2>
+
+        <p class="lead mb-3">Entrez votre nom ou numéro de téléphone pour valider votre présence à cet événement.</p>
+
+        <form method="get" action="{% url 'rechercher_utilisateur' evenement.id %}" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="q" placeholder="Rechercher par nom ou numéro de téléphone" class="form-control form-control-lg">
+                <button type="submit" class="btn btn-outline-primary btn-lg"><i class="bi bi-search"></i> Rechercher</button>
+            </div>
+        </form>
+
+        <hr class="my-4">
+
+        <div class="mb-4">
+            <h3 class="mb-3 text-info"><i class="bi bi-person-plus-fill me-2"></i> Vous êtes nouveau ?</h3>
+            <a class="btn btn-success btn-lg" href="{% url 'inscription' %}"><i class="bi bi-plus-circle-fill me-2"></i> S'inscrire</a>
+        </div>
+
+        {% if utilisateurs and request.GET.q %}
+            <h3 class="mt-4 text-success"><i class="bi bi-check-circle-fill me-2"></i> Résultats de recherche</h3>
+            <ul class="list-group">
+                {% for utilisateur in utilisateurs %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ utilisateur.nom }} {{ utilisateur.prenoms }}</strong>
+                            <br>
+                            <small class="text-muted"><i class="bi bi-phone-fill me-1"></i> {{ utilisateur.numero }}</small>
+                        </div>
+                        <form method="post" action="{% url 'valider_presence_evenement' evenement.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="utilisateur_id" value="{{ utilisateur.id }}">
+                            <button type="submit" class="btn btn-outline-success btn-sm"><i class="bi bi-check"></i> Valider</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% elif request.GET.q %}
+            <div class="alert alert-warning mt-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Aucun utilisateur trouvé pour cette recherche. Veuillez réessayer.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

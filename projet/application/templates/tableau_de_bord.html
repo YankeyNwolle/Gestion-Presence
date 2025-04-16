@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de Bord Administrateur{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Tableau de Bord Administrateur</h1>
+
+    <!-- Formulaire de filtrage -->
+    <form method="get" action="{% url 'tableau_de_bord' %}" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="date" class="form-label">Date :</label>
+                <input type="date" name="date" id="date" class="form-control" value="{{ request.GET.date }}">
+            </div>
+            <div class="col-md-4">
+                <label for="departement" class="form-label">Département :</label>
+                <select name="departement" id="departement" class="form-select">
+                    <option value="">Tous les départements</option>
+                    {% for departement in departements %}
+                    <option value="{{ departement.id }}" {% if request.GET.departement == departement.id|stringformat:"s" %}selected{% endif %}>{{ departement.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Statistiques globales -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Présents</h5>
+                    <p class="card-text">{{ total_present }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Absents</h5>
+                    <p class="card-text">{{ total_absent }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Excusés</h5>
+                    <p class="card-text">{{ total_excuse }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Statistiques par événement -->
+<h2>Statistiques par Événement</h2>
+<table class="table table-striped mt-4">
+    <thead>
+        <tr>
+            <th>Événement</th>
+            <th>Présents</th>
+            <th>Absents</th>
+            <th>Excusés</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats_par_evenement %}
+        <tr>
+            <td>{{ stat.titre }}</td>  <!-- Correction ici : affichage direct du titre -->
+            <td>{{ stat.total_presences }}</td>
+            <td>{{ stat.total_absences }}</td>
+            <td>{{ stat.total_excuses }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Statistiques par département -->
+<h2>Statistiques par Département</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Département</th>
+            <th>Présents</th>
+            <th>Absents</th>
+            <th>Excusés</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats_par_departement %}
+        <tr>
+            <td>{{ stat.nom_depart }}</td>  <!-- Correction ici : affichage direct du nom du département -->
+            <td>{{ stat.total_presences }}</td>
+            <td>{{ stat.total_absences }}</td>
+            <td>{{ stat.total_excuses }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}
