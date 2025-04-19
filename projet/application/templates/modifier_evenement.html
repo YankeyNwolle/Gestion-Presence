@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier Événement{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center text-primary">Modifier l'événement : {{ evenement.titre }}</h2>
+
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Enregistrer les modifications</button>
+        <a href="{% url 'tableau_de_bord' %}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+{% endblock %}

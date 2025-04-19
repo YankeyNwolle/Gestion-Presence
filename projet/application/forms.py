@@ -1,5 +1,5 @@
 from django import forms
-from .models import Utilisateur, Evenement
+from .models import Utilisateur, Evenement, Departement
 from django.forms.widgets import DateInput
 
 
@@ -21,3 +21,9 @@ class EvenementForm(forms.ModelForm):
         widgets = {
             'date_debut': forms.DateInput(attrs={'type': 'date', 'format': '%d-%m-%Y'}),
         }
+
+
+class DepartementForm(forms.ModelForm):
+    class Meta:
+        model = Departement
+        fields = ['nom_depart']

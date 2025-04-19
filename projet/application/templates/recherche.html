@@ -1,8 +1,20 @@
-{% extends 'base.html' %} {# Assurez-vous d'avoir un template de base #}
+{% extends 'base.html' %} 
 
 {% block content %}
 <div class="container mt-5">
     <div class="card shadow-lg p-4">
+        
+        <!--Affichage des messages Django -->
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
         <h2 class="mb-4 text-primary"><i class="bi bi-search me-2"></i> Recherche pour l'événement : {{ evenement.titre }}</h2>
 
         <p class="lead mb-3">Entrez votre nom ou numéro de téléphone pour valider votre présence à cet événement.</p>

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from datetime import datetime, time
 from django.utils.timezone import make_aware
 
@@ -8,16 +8,23 @@ from django.contrib.auth.models import User  # Remplace par ton modèle Utilisat
 from django.utils.timezone import make_aware
 
 from .models import Utilisateur 
+from django.contrib import messages
 
 #from .models import Utilisateur, Presence, Commentaire,Evenement,Departement
-from .forms import UtilisateurForm, EvenementForm
+from .forms import UtilisateurForm, EvenementForm, DepartementForm
 from .models import Utilisateur, Presence, Departement
 from datetime import date
 from .models import Evenement
 
+from .models import Presence, Departement, Evenement
+
 def home(request):
     evenements = Evenement.objects.all()  # Récupère tous les événements de la base de données
     return render(request, "home.html", {"evenements": evenements})  # Passe les événements au template
+
+def liste_evenements(request):
+    evenements = Evenement.objects.all().order_by('-date_debut')  # Trier du plus récent au plus ancien
+    return render(request, "liste_evenements.html", {"evenements": evenements})
 
 
 def inscription(request):
@@ -52,7 +59,7 @@ def rechercher_utilisateur(request, evenement_id):
     })
 
 
-
+"""  
 def valider_presence_evenement(request, evenement_id):
     if request.method == 'POST':
         utilisateur_id = request.POST.get('utilisateur_id')
@@ -68,6 +75,32 @@ def valider_presence_evenement(request, evenement_id):
         return redirect('tableau_de_bord')
 
     return redirect('home')
+"""
+
+
+def valider_presence_evenement(request, evenement_id):
+    if request.method == 'POST':
+        utilisateur_id = request.POST.get('utilisateur_id')
+        evenement = get_object_or_404(Evenement, id=evenement_id)
+        utilisateur = get_object_or_404(Utilisateur, id=utilisateur_id)
+
+        # Vérifier si l'utilisateur est déjà inscrit à cet événement
+        presence_existante = Presence.objects.filter(membre=utilisateur, evenement=evenement).exists()
+
+        if presence_existante:
+            messages.error(request, "Vous avez déjà validé votre présence à cet événement.")
+            return redirect(request.META.get('HTTP_REFERER', 'home'))  # Revient sur la même page
+
+        # Enregistrer la nouvelle présence
+        Presence.objects.create(
+            membre=utilisateur,
+            evenement=evenement,
+            date=evenement.date_debut.date(),
+            statut='present'
+        )
+        messages.success(request, "Votre présence a été validée avec succès !")
+        return redirect(request.META.get('HTTP_REFERER', 'home'))  #Revient sur la même page
+
 
 
  # Ton modèle personnalisé Utilisateur
@@ -91,11 +124,10 @@ def creer_evenement(request):
     return render(request, 'creer_evenement.html', {'form': form})
 
 
-from django.db.models import Count, Q, F
-from django.shortcuts import render
-from .models import Presence, Departement, Evenement
+# permettre l'accessibilité du tableaud de bord à l'admin
 
 def tableau_de_bord(request):
+
     # Récupérer les filtres depuis la requête GET
     date_filtre = request.GET.get('date')
     departement_filtre = request.GET.get('departement')
@@ -124,7 +156,7 @@ def tableau_de_bord(request):
         ).order_by('nom_depart')
     )
 
-# 🚀 Correction du calcul global des absents
+# Correction du calcul global des absents
     total_absent = sum(departement.total_absences for departement in stats_par_departement if departement.total_utilisateurs > 0)
 
 
@@ -132,15 +164,13 @@ def tableau_de_bord(request):
 
     stats_par_evenement = (
         Evenement.objects.annotate(
-            total_participants=Count('presence__membre'),  # ✅ Remplace 'utilisateurs' par le bon champ
+            total_participants=Count('presence__membre'),  # Remplace 'utilisateurs' par le bon champ
             total_presences=Count('presence', filter=Q(presence__statut='present')),
             total_excuses=Count('presence', filter=Q(presence__statut='excuse')),
         ).annotate(
             total_absences=F('total_participants') - F('total_presences')
         ).order_by('titre')
     )
-
-
 
 
     # Récupérer tous les départements pour le filtre
@@ -155,3 +185,103 @@ def tableau_de_bord(request):
         'stats_par_evenement': stats_par_evenement,
         'departements': departements,
     })
+
+# détail de chaque evenement
+
+
+
+def statistique_evenement(request, evenement_id):
+    evenement = get_object_or_404(Evenement, id=evenement_id)
+
+    # Filtrer les présences de cet événement
+    presences = Presence.objects.filter(evenement=evenement)
+
+    #Récupérer TOUS les utilisateurs inscrits à l’événement (correction)
+    total_inscrits = Utilisateur.objects.filter(Q(presence__evenement=evenement) | Q(departement__isnull=False)).distinct().count()
+
+    # Calcul des statistiques spécifiques
+    total_present = presences.filter(statut='present').count()
+    total_excuse = presences.filter(statut='excuse').count()
+
+    # Correction du calcul des absents
+    total_absent = total_inscrits - (total_present + total_excuse)
+
+    # Debugging (Affiche les valeurs dans la console pour vérifier)
+    print(f"Total inscrits: {total_inscrits}")
+    print(f"Total présents: {total_present}")
+    print(f"Total excusés: {total_excuse}")
+    print(f"Total absents calculé: {total_absent}")
+
+    # Statistiques par brigade (département)
+    stats_par_brigade = (
+        Departement.objects.annotate(
+            total_utilisateurs=Count('utilisateurs', distinct=True),
+            total_presences=Count('utilisateurs__presence', filter=Q(utilisateurs__presence__statut='present', utilisateurs__presence__evenement=evenement)),
+        ).annotate(
+            total_absences=F('total_utilisateurs') - F('total_presences')
+        ).order_by('nom_depart')
+    )
+
+    return render(request, 'statistique_evenement.html', {
+        'evenement': evenement,
+        'total_present': total_present,
+        'total_absent': total_absent, 
+        'total_excuse': total_excuse,
+        'stats_par_brigade': stats_par_brigade,
+    })
+
+# modifier un evenement(seule l'administrateur peut modifier un evenement)
+
+def modifier_evenement(request, evenement_id):
+    evenement = get_object_or_404(Evenement, id=evenement_id)
+
+    if request.method == "POST":
+        form = EvenementForm(request.POST, instance=evenement)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Événement modifié avec succès !")
+            return redirect('tableau_de_bord')
+
+    else:
+        form = EvenementForm(instance=evenement)
+
+    return render(request, "modifier_evenement.html", {"form": form, "evenement": evenement})
+
+# supprimer un utilisateur
+
+def supprimer_utilisateur(request, utilisateur_id):
+    utilisateur = get_object_or_404(Utilisateur, id=utilisateur_id)
+    
+    if request.method == "POST":
+        utilisateur.delete()
+        messages.success(request, "Utilisateur supprimé avec succès !")
+        return redirect(request.META.get('HTTP_REFERER', 'tableau_de_bord'))
+
+    return render(request, "confirmer_suppression_utilisateur.html", {"utilisateur": utilisateur})
+
+# supprimer un departement
+
+def supprimer_departement(request, departement_id):
+    departement = get_object_or_404(Departement, id=departement_id)
+
+    if request.method == "POST":
+        departement.delete()
+        messages.success(request, "Departement supprimé avec succès !")
+        return redirect(request.META.get('HTTP_REFERER', 'tableau_de_bord'))
+
+    return render(request, "confirmer_suppression_departement.html", {"departement": departement})
+
+# ajouter un departement
+
+def ajouter_departement(request):
+    if request.method == "POST":
+        form = DepartementForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Département ajouté avec succès !")
+            return redirect('tableau_de_bord')
+
+    else:
+        form = DepartementForm()
+
+    return render(request, "ajouter_departement.html", {"form": form})

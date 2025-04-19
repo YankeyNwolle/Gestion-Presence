@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Statistiques - {{ evenement.titre }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center">Statistiques de l'événement : {{ evenement.titre }}</h1>
+    <p class="text-center">Date : {{ evenement.date_debut }}</p>
+
+    <!-- Statistiques de l'événement -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Présents</h5>
+                    <p class="card-text">{{ total_present }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Absents</h5>
+                    <p class="card-text">{{ total_absent }}</p>  
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Excusés</h5>
+                    <p class="card-text">{{ total_excuse }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des présences -->
+    <h3>Détail des présences</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom du membre</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for presence in presences %}
+            <tr>
+                <td>{{ presence.membre.nom }}</td>
+                <td>{{ presence.statut }}</td>
+            </tr>
+            {% endfor %}
+
+
+            <h2>Statistiques par Brigade</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Brigade</th>
+            <th>Présents</th>
+            <th>Absents</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for brigade in stats_par_brigade %}
+        <tr>
+            <td>{{ brigade.nom_depart }}</td>
+            <td>{{ brigade.total_presences }}</td>
+            <td>{{ brigade.total_absences }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+        </tbody>
+    </table>
+
+    <!-- Bouton de retour au tableau de bord -->
+    <div class="text-center mt-4">
+        <a href="{% url 'tableau_de_bord' %}" class="btn btn-primary">Retour au Tableau de Bord</a>
+    </div>
+</div>
+{% endblock %}

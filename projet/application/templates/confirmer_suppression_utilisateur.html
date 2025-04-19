@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Supprimer Utilisateur{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center text-danger">Supprimer l'utilisateur : {{ utilisateur.nom }}</h2>
+
+    <p class="text-center">Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+        <a href="{% url 'tableau_de_bord' %}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+{% endblock %}
