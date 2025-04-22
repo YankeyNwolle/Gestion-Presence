@@ -9,7 +9,7 @@
 ✔ **Enregistrement des présences et absences** automatiquement  
 ✔ **Statistiques détaillées** sur la participation aux événements  
 ✔ **Inscription intelligente** (évite les doublons)  
-✔ **Interface optimisée pour tablette** 📱  
+✔ **Interface optimisée pour tablette** 
 ✔ **Déploiement sur le cloud (Railway & Heroku)**  
 
 ---
